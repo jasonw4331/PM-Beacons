@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace jasonwynn10\beacon;
 
 use jasonwynn10\beacon\block\Beacon;
+use jasonwynn10\beacon\tile\Beacon as BeaconTile;
 use pocketmine\Achievement;
 use pocketmine\block\BlockFactory;
 use pocketmine\event\Listener;
@@ -10,11 +11,14 @@ use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\types\NetworkInventoryAction;
 use pocketmine\plugin\PluginBase;
+use pocketmine\tile\Tile;
 
 class Beacons extends PluginBase implements Listener {
 	public function onEnable() {
+		Achievement::add("create_full_beacon", "Beaconator", ["Create a full beacon"]);
+		/** @noinspection PhpUnhandledExceptionInspection */
+		Tile::registerTile(BeaconTile::class, [BeaconTile::BEACON, "minecraft:beacon"]);
 		BlockFactory::registerBlock(new Beacon(), true);
-		Achievement::add("buildBeacon", "Beaconator", ["Create a full beacon"]);
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 	}
 

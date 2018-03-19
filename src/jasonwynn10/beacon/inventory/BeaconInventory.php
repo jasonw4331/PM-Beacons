@@ -2,22 +2,22 @@
 declare(strict_types=1);
 namespace jasonwynn10\beacon\inventory;
 
+use jasonwynn10\beacon\tile\Beacon;
 use pocketmine\inventory\ContainerInventory;
-use pocketmine\level\Position;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
 use pocketmine\Player;
 
 class BeaconInventory extends ContainerInventory {
 
-	/** @var Position $holder */
+	/** @var Beacon $holder */
 	protected $holder;
 
 	/**
 	 * BeaconInventory constructor.
 	 *
-	 * @param Position $pos
+	 * @param Beacon $pos
 	 */
-	public function __construct(Position $pos) {
+	public function __construct(Beacon $pos) {
 		parent::__construct($pos->asPosition());
 	}
 
@@ -43,7 +43,7 @@ class BeaconInventory extends ContainerInventory {
 	}
 
 	/**
-	 * @return Position
+	 * @return Beacon
 	 */
 	public function getHolder() {
 		return $this->holder;

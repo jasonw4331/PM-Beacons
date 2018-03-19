@@ -2,11 +2,13 @@
 declare(strict_types=1);
 namespace jasonwynn10\beacon\block;
 
-use jasonwynn10\beacon\inventory\BeaconInventory;
+use jasonwynn10\beacon\tile\Beacon as BeaconTile;
+use pocketmine\Achievement;
 use pocketmine\block\Block;
 use pocketmine\block\BlockToolType;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
 
 class Beacon extends Block {
@@ -61,9 +63,12 @@ class Beacon extends Block {
 	 * @return bool
 	 */
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool {
-		// TODO: check pyramid
-		// TODO: achievement
-		return parent::place($item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		/** @var BeaconTile $beacon */
+		$beacon = BeaconTile::createTile(BeaconTile::BEACON, $this->getLevel(), BeaconTile::createNBT($this, $face, $item, $player));
+		if($beacon->checkPyramid() > 3) {
+			Achievement::broadcast($player, "create_full_beacon");
+		}
+		return true;
 	}
 
 	/**
@@ -73,7 +78,19 @@ class Beacon extends Block {
 	 */
 	public function onActivate(Item $item, Player $player = null) : bool {
 		if($player instanceof Player) {
-			$player->addWindow(new BeaconInventory($this));
+			$t = $this->getLevel()->getTile($this);
+			$beacon = null;
+			if($t instanceof BeaconTile){
+				$beacon = $t;
+			}else{
+				$beacon = BeaconTile::createTile(BeaconTile::BEACON, $this->getLevel(), BeaconTile::createNBT($this));
+			}
+
+			if($beacon->namedtag->hasTag("Lock", StringTag::class) and $beacon->namedtag->getString("Lock") !== $item->getCustomName()){
+				return true;
+			}
+
+			$player->addWindow($beacon->getInventory());
 		}
 		return true;
 	}
@@ -81,7 +98,7 @@ class Beacon extends Block {
 	/**
 	 * @return int
 	 */
-	public function getVariantBitmask() : int{
+	public function getVariantBitmask() : int {
 		return 0;
 	}
 }
