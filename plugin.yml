@@ -1,0 +1,6 @@
+name: PM-Beacons
+main: jasonwynn10\beacon\Beacons
+version: 0.0.1
+api: 3.0.0-ALPHA11
+description: "Beacons for PocketMine-MP exactly like Vanilla!"
+author: "jasonwynn10"
