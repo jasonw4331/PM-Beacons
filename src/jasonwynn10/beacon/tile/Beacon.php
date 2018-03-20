@@ -27,6 +27,8 @@ class Beacon extends Spawnable implements InventoryHolder {
 
 	/** @var BeaconInventory $inventory */
 	protected $inventory;
+	/** @var int $ticks */
+	private $ticks = 0;
 
 	/**
 	 * Beacon constructor.
@@ -47,42 +49,45 @@ class Beacon extends Spawnable implements InventoryHolder {
 		}
 		$this->timings->startTiming();
 		$ret = false;
-		// TODO: only do this every 4 seconds
-		$levels = $this->checkPyramid();
-		if($levels > 0) {
-			if($this->namedtag->getInt(self::TAG_LEVELS, 0) === 0 and $this->namedtag->getInt(self::TAG_LEVELS) !== $levels) {
-				$this->namedtag->setInt(self::TAG_LEVELS, 0); // Replicates delay when pyramid block broken. Effects resume when block replaced.
-				$ret = true;
-			}elseif($this->namedtag->getInt(self::TAG_LEVELS) !== $levels) {
-				$this->namedtag->setInt(self::TAG_LEVELS, $levels);
-				$ret = true;
-			}else{
-				$duration = 9 + ($levels * 2);
-				switch($levels) {
-					case 1:
-						$range = 20;
-					break;
-					case 2:
-						$range = 30;
-					break;
-					case 3:
-						$range = 40;
-					break;
-					case 4:
-						$range = 50;
-					break;
-				}
-				if(isset($range))
-					foreach($this->level->getPlayers() as $player) {
-						if($player->distance($this) <= $range) {
-							$effectId = $this->namedtag->getInt(self::TAG_PRIMARY, 0);
-							if($effectId !== 0)
-								$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20));
-							$effectId = $this->namedtag->getInt(self::TAG_SECONDARY, 0);
-							if($effectId !== 0)
-								$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20));
-						}
+		$currentTick = $this->getLevel()->getServer()->getTick();
+		if($this->ticks + 80 === $currentTick) { // 80 ticks = 4 seconds
+			$this->ticks = $currentTick;
+			$levels = $this->checkPyramid();
+			if($levels > 0) {
+				if($this->namedtag->getInt(self::TAG_LEVELS, 0) === 0 and $this->namedtag->getInt(self::TAG_LEVELS) !== $levels) {
+					$this->namedtag->setInt(self::TAG_LEVELS, 0); // Replicates delay when pyramid block broken. Effects resume when block replaced.
+					$ret = true;
+				}elseif($this->namedtag->getInt(self::TAG_LEVELS) !== $levels) {
+					$this->namedtag->setInt(self::TAG_LEVELS, $levels);
+					$ret = true;
+				}else{
+					$duration = 9 + ($levels * 2);
+					switch($levels) {
+						case 1:
+							$range = 20;
+							break;
+						case 2:
+							$range = 30;
+							break;
+						case 3:
+							$range = 40;
+							break;
+						case 4:
+							$range = 50;
+							break;
 					}
+					if(isset($range))
+						foreach($this->level->getPlayers() as $player) {
+							if($player->distance($this) <= $range) {
+								$effectId = $this->namedtag->getInt(self::TAG_PRIMARY, 0);
+								if($effectId !== 0)
+									$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20));
+								$effectId = $this->namedtag->getInt(self::TAG_SECONDARY, 0);
+								if($effectId !== 0)
+									$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20));
+							}
+						}
+				}
 			}
 		}
 		$this->timings->stopTiming();
