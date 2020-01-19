@@ -91,4 +91,23 @@ class Beacon extends Block {
 		}
 		return true;
 	}
+
+	/**
+	 * @param Item $item
+	 * @param Player|null $player
+	 *
+	 * @return bool
+	 */
+	public function onBreak(Item $item, Player $player = null) : bool {
+		$t = $this->getLevel()->getTile($this);
+		$beacon = null;
+		if($t instanceof BeaconTile) {
+			$beacon = $t;
+		}else {
+			$beacon = BeaconTile::createTile(BeaconTile::BEACON, $this->getLevel(), BeaconTile::createNBT($this));
+		}
+		if(!$beacon->isMovable())
+			return false;
+		return parent::onBreak($item, $player);
+	}
 }
