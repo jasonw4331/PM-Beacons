@@ -8,20 +8,15 @@ use pocketmine\block\Block;
 use pocketmine\block\BlockIds;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
-use pocketmine\inventory\Inventory;
-use pocketmine\inventory\InventoryEventProcessor;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\Player;
-use pocketmine\tile\Container;
-use pocketmine\tile\ContainerTrait;
 use pocketmine\tile\Spawnable;
 
-class Beacon extends Spawnable implements InventoryHolder, Container {
-	use ContainerTrait;
+class Beacon extends Spawnable implements InventoryHolder {
 
 	public CONST BEACON = "beacon";
 
@@ -54,6 +49,7 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 	public function __construct(Level $level, CompoundTag $nbt) {
 		parent::__construct($level, $nbt);
 		$this->ticks = $this->getLevel()->getServer()->getTick();
+		$this->scheduleUpdate();
 	}
 
 	/**
@@ -153,6 +149,14 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 		return false;
 	}
 
+	public function spawnToAll(){
+		if($this->closed){
+			return;
+		}
+		// TODO: activate beam if no block above
+		parent::spawnToAll();
+	}
+
 	/**
 	 * @param CompoundTag $nbt
 	 */
@@ -204,7 +208,6 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 		$this->movable = max(1, $nbt->getByte(self::TAG_MOVABLE, 1, true));
 
 		$this->inventory = new BeaconInventory($this);
-		$this->loadItems($nbt);
 	}
 
 	/**
@@ -215,7 +218,6 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 		$nbt->setInt(self::TAG_PRIMARY, $this->primary);
 		$nbt->setInt(self::TAG_SECONDARY, $this->secondary);
 		$nbt->setByte(self::TAG_MOVABLE, (int)$this->movable);
-		$this->saveItems($nbt);
 	}
 
 	/**
@@ -290,12 +292,5 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 	public function setMovable(bool $movable) : self {
 		$this->movable = $movable;
 		return $this;
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function getRealInventory() {
-		return $this->getInventory();
 	}
 }

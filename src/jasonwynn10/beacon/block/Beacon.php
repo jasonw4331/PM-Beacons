@@ -86,9 +86,6 @@ class Beacon extends Block {
 				$beacon = BeaconTile::createTile(BeaconTile::BEACON, $this->getLevel(), BeaconTile::createNBT($this));
 			}
 
-			if(!$beacon->canOpenWith($item->getCustomName())) {
-				return true;
-			}
 			Beacons::setBeaconInventory($player, $beacon);
 			$player->addWindow($beacon->getInventory());
 		}
