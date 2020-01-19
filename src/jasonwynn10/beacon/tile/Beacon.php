@@ -53,6 +53,7 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 	 */
 	public function __construct(Level $level, CompoundTag $nbt) {
 		parent::__construct($level, $nbt);
+		$this->ticks = $this->getLevel()->getServer()->getTick();
 	}
 
 	/**
@@ -66,7 +67,7 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 		$this->timings->startTiming();
 
 		$currentTick = $this->getLevel()->getServer()->getTick();
-		if($this->ticks + 80 === $currentTick) { // 80 ticks = 4 seconds
+		if($this->ticks + 80 <= $currentTick) { // 80 ticks = 4 seconds
 			$this->ticks = $currentTick;
 
 			$levels = $this->getLayers();
@@ -84,14 +85,14 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 					if($player->distance($this) <= $range) {
 						$effectId = $this->primary;
 						if($effectId !== 0) {
-							$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20^2));
+							$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20^2, 0, false));
 						}
 						$effectId = $this->secondary;
 						if($effectId !== 0) {
 							if($this->secondary == $this->primary) {
-								$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20^2, 1));
+								$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20^2, 1, false));
 							}else{
-								$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20^2));
+								$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20^2, 0, false));
 							}
 						}
 					}
