@@ -25,9 +25,10 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 
 	public CONST BEACON = "beacon";
 
-	public CONST TAG_LEVELS = "Levels";
-	public CONST TAG_PRIMARY = "Primary";
-	public CONST TAG_SECONDARY = "Secondary";
+	public CONST TAG_LEVELS = "levels";
+	public CONST TAG_PRIMARY = "primary";
+	public CONST TAG_SECONDARY = "secondary";
+	public CONST TAG_MOVABLE = "isMovable";
 
 	const PYRAMID_BLOCKS = [BlockIds::DIAMOND_BLOCK, BlockIds::EMERALD_BLOCK, BlockIds::GOLD_BLOCK, BlockIds::IRON_BLOCK];
 
@@ -41,6 +42,8 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 	protected $primary = 0;
 	/** @var int $secondary */
 	protected $secondary = 0;
+	/** @var bool $movable */
+	protected $movable = 0;
 
 	/**
 	 * Beacon constructor.
@@ -62,32 +65,33 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 
 		$this->timings->startTiming();
 
-		$ret = false;
-
 		$currentTick = $this->getLevel()->getServer()->getTick();
 		if($this->ticks + 80 === $currentTick) { // 80 ticks = 4 seconds
 			$this->ticks = $currentTick;
 
-			$levels = $this->checkPyramid();
-			if($levels > 0) {
-				if($this->tier > $levels) {
-					$this->tier = 0; // Replicates delay when pyramid block broken. Effects resume when block replaced.
-					$ret = true;
-				}elseif($this->tier < $levels) {
+			$levels = $this->getLayers();
+			if($this->tier > $levels) {
+				$this->tier = 0; // Replicates delay when pyramid block broken. Effects resume when block replaced.
+				$this->spawnToAll();
+			}else {
+				if($this->tier < $levels) {
 					$this->tier = $levels;
-					$ret = true;
-				}else {
-					$duration = 9 + ($levels * 2);
-					$range = 10 + ($levels * 10);
-					foreach($this->level->getPlayers() as $player) {
-						if($player->distance($this) <= $range) {
-							$effectId = $this->primary;
-							if($effectId !== 0) {
-								$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20));
-							}
-							$effectId = $this->secondary;
-							if($effectId !== 0) {
-								$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20));
+					$this->spawnToAll();
+				}
+				$duration = 9 + ($levels * 2);
+				$range = 10 + ($levels * 10);
+				foreach($this->level->getPlayers() as $player) {
+					if($player->distance($this) <= $range) {
+						$effectId = $this->primary;
+						if($effectId !== 0) {
+							$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20^2));
+						}
+						$effectId = $this->secondary;
+						if($effectId !== 0) {
+							if($this->secondary == $this->primary) {
+								$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20^2, 1));
+							}else{
+								$player->addEffect(new EffectInstance(Effect::getEffect($effectId), $duration * 20^2));
 							}
 						}
 					}
@@ -95,48 +99,53 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 			}
 		}
 		$this->timings->stopTiming();
-		return $ret;
+		return true;
 	}
 
 	/**
 	 * @return int
 	 */
-	public function checkPyramid() : int {
-		$levels = 0;
-		if($this->isSolidAbove())
-			return $levels;
-		for($y = 1; $y <= 4; $y++, $levels++) {
-			for($x = 0; $x <= 1 + $levels; $x++) {
-				for($z = 0; $z <= 1 + $levels; $z++) {
-					$id = $this->level->getBlockIdAt($this->x + $x, $this->y - $y, $this->z + $z);
-					if(!in_array($id, self::PYRAMID_BLOCKS)) {
-						break 3;
-					}
-					$id = $this->level->getBlockIdAt($this->x - $x, $this->y - $y, $this->z - $z);
-					if(!in_array($id, self::PYRAMID_BLOCKS)) {
-						break 3;
-					}
-					$id = $this->level->getBlockIdAt($this->x + $x, $this->y - $y, $this->z - $z);
-					if(!in_array($id, self::PYRAMID_BLOCKS)) {
-						break 3;
-					}
-					$id = $this->level->getBlockIdAt($this->x - $x, $this->y - $y, $this->z + $z);
-					if(!in_array($id, self::PYRAMID_BLOCKS)) {
-						break 3;
-					}
-				}
-			}
-		}
-		return $levels;
+	public function getLayers() : int {
+		$layers = 0;
+		if($this->checkShape($this->getSide(0), 1))
+			$layers++;
+		else
+			return $layers;
+		if($this->checkShape($this->getSide(0, 2), 2))
+			$layers++;
+		else
+			return $layers;
+		if($this->checkShape($this->getSide(0, 3), 3))
+			$layers++;
+		else
+			return $layers;
+		if($this->checkShape($this->getSide(0, 4), 4))
+			$layers++;
+
+		return $layers;
+	}
+
+	/**
+	 * @param Vector3 $pos
+	 * @param int $layer
+	 *
+	 * @return bool
+	 */
+	public function checkShape(Vector3 $pos, $layer = 1) : bool {
+		for($x = $pos->x - $layer; $x <= $pos->x + $layer; $x++)
+			for($z = $pos->z - $layer; $z <= $pos->z + $layer; $z++)
+				if(!in_array($this->getLevel()->getBlockIdAt($x, $pos->y, $z), [Block::DIAMOND_BLOCK, Block::IRON_BLOCK, Block::EMERALD_BLOCK, Block::GOLD_BLOCK]))
+					return false;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function isSolidAbove() : bool {
+	public function solidAbove() : bool {
 		if($this->y === $this->getLevel()->getHighestBlockAt($this->x, $this->z))
 			return false;
-		for($i = $this->y; $i < $this->level->getWorldHeight(); $i++) {
+		for($i = $this->y; $i < $this->level->getWorldHeight(); $i++){
 			if(($block = $this->getLevel()->getBlockAt($this->x, $i, $this->z))->isSolid() && !$block->getId() === Block::BEACON)
 				return true;
 		}
@@ -147,9 +156,27 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 	 * @param CompoundTag $nbt
 	 */
 	public function addAdditionalSpawnData(CompoundTag $nbt) : void {
-		$nbt->setInt(self::TAG_LEVELS, $this->checkPyramid());
+		$nbt->setInt(self::TAG_LEVELS, $this->getLayers());
 		$nbt->setInt(self::TAG_PRIMARY, 0);
 		$nbt->setInt(self::TAG_SECONDARY, 0);
+		$nbt->setByte(self::TAG_MOVABLE, 1);
+	}
+
+	/**
+	 * @param CompoundTag $nbt
+	 * @param Player $player
+	 *
+	 * @return bool
+	 */
+	public function updateCompoundTag(CompoundTag $nbt, Player $player) : bool {
+		$this->tier = $this->getLayers();
+		$this->primary = max(0, $nbt->getInt(self::TAG_PRIMARY, 0, true));
+		$this->secondary = max(0, $nbt->getInt(self::TAG_SECONDARY, 0, true));
+		$this->movable = max(0, $nbt->getByte(self::TAG_MOVABLE, 0, true));
+
+		$this->scheduleUpdate();
+		$this->spawnToAll();
+		return true;
 	}
 
 	/**
@@ -163,6 +190,7 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 		$nbt->setInt(self::TAG_LEVELS, 0);
 		$nbt->setInt(self::TAG_PRIMARY, 0);
 		$nbt->setInt(self::TAG_SECONDARY, 0);
+		$nbt->setByte(self::TAG_MOVABLE, 1);
 	}
 
 	/**
@@ -172,23 +200,10 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 		$this->tier = max(0, $nbt->getInt(self::TAG_LEVELS, 0, true));
 		$this->primary = max(0, $nbt->getInt(self::TAG_PRIMARY, 0, true));
 		$this->secondary = max(0, $nbt->getInt(self::TAG_SECONDARY, 0, true));
+		$this->movable = max(1, $nbt->getByte(self::TAG_MOVABLE, 1, true));
 
 		$this->inventory = new BeaconInventory($this);
 		$this->loadItems($nbt);
-
-		$this->inventory->setEventProcessor(new class($this) implements InventoryEventProcessor{
-			/** @var Beacon */
-			private $beacon;
-
-			public function __construct(Beacon $beacon) {
-				$this->beacon = $beacon;
-			}
-
-			public function onSlotChange(Inventory $inventory, int $slot, Item $oldItem, Item $newItem) : ?Item{
-				$this->beacon->scheduleUpdate();
-				return $newItem;
-			}
-		});
 	}
 
 	/**
@@ -198,6 +213,7 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 		$nbt->setInt(self::TAG_LEVELS, $this->tier);
 		$nbt->setInt(self::TAG_PRIMARY, $this->primary);
 		$nbt->setInt(self::TAG_SECONDARY, $this->secondary);
+		$nbt->setByte(self::TAG_MOVABLE, (int)$this->movable);
 		$this->saveItems($nbt);
 	}
 
@@ -255,6 +271,23 @@ class Beacon extends Spawnable implements InventoryHolder, Container {
 	 */
 	public function setSecondary(int $secondary) : self {
 		$this->secondary = $secondary;
+		return $this;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isMovable() : bool {
+		return $this->movable;
+	}
+
+	/**
+	 * @param bool $movable
+	 *
+	 * @return self
+	 */
+	public function setMovable(bool $movable) : self {
+		$this->movable = $movable;
 		return $this;
 	}
 

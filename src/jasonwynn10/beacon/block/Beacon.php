@@ -15,7 +15,7 @@ class Beacon extends Block {
 	protected $id = self::BEACON;
 
 	public function __construct(int $meta = 0){
-		$this->meta = $meta;
+		parent::__construct(self::BEACON, $meta);
 	}
 
 	/**
@@ -65,7 +65,7 @@ class Beacon extends Block {
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool {
 		/** @var BeaconTile $beacon */
 		$beacon = BeaconTile::createTile(BeaconTile::BEACON, $this->getLevel(), BeaconTile::createNBT($this, $face, $item, $player));
-		if($beacon->checkPyramid() > 3) {
+		if($beacon->getLayers() > 3) {
 			Achievement::broadcast($player, "create_full_beacon");
 		}
 		return parent::place($item, $blockReplace, $blockClicked, $face, $clickVector, $player);
