@@ -1,0 +1,7 @@
+--- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/jasonwynn10/PM-Beacons
+build-by-default: true
+projects:
+  PM-Beacons:
+    path: ""
+    icon: icon.png
+...
