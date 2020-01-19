@@ -8,7 +8,6 @@ use pocketmine\block\Block;
 use pocketmine\block\BlockToolType;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
 
 class Beacon extends Block {
@@ -68,7 +67,7 @@ class Beacon extends Block {
 		if($beacon->checkPyramid() > 3) {
 			Achievement::broadcast($player, "create_full_beacon");
 		}
-		return true;
+		return parent::place($item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	/**
@@ -80,25 +79,18 @@ class Beacon extends Block {
 		if($player instanceof Player) {
 			$t = $this->getLevel()->getTile($this);
 			$beacon = null;
-			if($t instanceof BeaconTile){
+			if($t instanceof BeaconTile) {
 				$beacon = $t;
-			}else{
+			}else {
 				$beacon = BeaconTile::createTile(BeaconTile::BEACON, $this->getLevel(), BeaconTile::createNBT($this));
 			}
 
-			if($beacon->namedtag->hasTag("Lock", StringTag::class) and $beacon->namedtag->getString("Lock") !== $item->getCustomName()){
+			if(!$beacon->canOpenWith($item->getCustomName())) {
 				return true;
 			}
 
 			$player->addWindow($beacon->getInventory());
 		}
 		return true;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getVariantBitmask() : int {
-		return 0;
 	}
 }
