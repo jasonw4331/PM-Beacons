@@ -36,13 +36,14 @@ class BeaconInventory extends ContainerInventory {
 	 * @return int
 	 */
 	public function getDefaultSize() : int {
-		return 3; //TODO
+		return 1;
 	}
 
 	/**
 	 * @return Position
 	 */
 	public function getHolder() {
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
 		return parent::getHolder();
 	}
 

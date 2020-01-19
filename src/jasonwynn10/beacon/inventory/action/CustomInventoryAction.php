@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace jasonwynn10\beacon\inventory\action;
 
+use jasonwynn10\beacon\Beacons;
 use pocketmine\inventory\CraftingGrid;
 use pocketmine\inventory\transaction\action\CreativeInventoryAction;
 use pocketmine\inventory\transaction\action\DropItemAction;
@@ -30,8 +31,10 @@ class CustomInventoryAction extends NetworkInventoryAction {
 					if($this->inventorySlot === 50){
 						return null; //useless noise
 					}
-					// TODO: slot 27 is Beacon UI
-					if($this->inventorySlot >= 28 and $this->inventorySlot <= 31){
+					if($this->inventorySlot = 27) { // slot 27 is Beacon UI
+						$window = Beacons::getBeaconInventory($player);
+						$slot = $this->inventorySlot - 27;
+					}elseif($this->inventorySlot >= 28 and $this->inventorySlot <= 31){
 						$window = $player->getCraftingGrid();
 						if($window->getGridWidth() !== CraftingGrid::SIZE_SMALL){
 							throw new \UnexpectedValueException("Expected small crafting grid");
@@ -80,9 +83,11 @@ class CustomInventoryAction extends NetworkInventoryAction {
 				switch($this->windowId){
 					case self::SOURCE_TYPE_CRAFTING_RESULT:
 					case self::SOURCE_TYPE_CRAFTING_USE_INGREDIENT:
-					case self::SOURCE_TYPE_BEACON:
-					case -10: // TODO: why is beacon always -10
 						return null;
+					break;
+					case -10: // TODO: is beacon always -10 ?
+						return new DeleteItemAction($this->oldItem, $this->newItem);
+					break;
 				}
 
 				//TODO: more stuff

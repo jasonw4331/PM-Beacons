@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace jasonwynn10\beacon\block;
 
+use jasonwynn10\beacon\Beacons;
 use jasonwynn10\beacon\tile\Beacon as BeaconTile;
 use pocketmine\Achievement;
 use pocketmine\block\Block;
@@ -88,7 +89,7 @@ class Beacon extends Block {
 			if(!$beacon->canOpenWith($item->getCustomName())) {
 				return true;
 			}
-
+			Beacons::setBeaconInventory($player, $beacon);
 			$player->addWindow($beacon->getInventory());
 		}
 		return true;
