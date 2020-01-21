@@ -38,7 +38,7 @@ class Beacon extends Spawnable implements InventoryHolder {
 	/** @var int $secondary */
 	protected $secondary = 0;
 	/** @var bool $movable */
-	protected $movable = 0;
+	protected $movable = true;
 
 	/**
 	 * Beacon constructor.
@@ -177,7 +177,7 @@ class Beacon extends Spawnable implements InventoryHolder {
 		$this->tier = $this->getLayers();
 		$this->primary = max(0, $nbt->getInt(self::TAG_PRIMARY, 0, true));
 		$this->secondary = max(0, $nbt->getInt(self::TAG_SECONDARY, 0, true));
-		$this->movable = max(0, $nbt->getByte(self::TAG_MOVABLE, 0, true));
+		$this->movable = (bool)max(0, $nbt->getByte(self::TAG_MOVABLE, 0, true));
 
 		$this->scheduleUpdate();
 		$this->spawnToAll();
@@ -205,7 +205,7 @@ class Beacon extends Spawnable implements InventoryHolder {
 		$this->tier = max(0, $nbt->getInt(self::TAG_LEVELS, 0, true));
 		$this->primary = max(0, $nbt->getInt(self::TAG_PRIMARY, 0, true));
 		$this->secondary = max(0, $nbt->getInt(self::TAG_SECONDARY, 0, true));
-		$this->movable = max(1, $nbt->getByte(self::TAG_MOVABLE, 1, true));
+		$this->movable = (bool)max(1, $nbt->getByte(self::TAG_MOVABLE, 1, true));
 
 		$this->inventory = new BeaconInventory($this);
 	}
@@ -281,7 +281,7 @@ class Beacon extends Spawnable implements InventoryHolder {
 	 * @return bool
 	 */
 	public function isMovable() : bool {
-		return $this->movable;
+		return (bool)$this->movable;
 	}
 
 	/**
