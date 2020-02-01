@@ -31,7 +31,7 @@ class CustomInventoryAction extends NetworkInventoryAction {
 					if($this->inventorySlot === 50){
 						return null; //useless noise
 					}
-					if($this->inventorySlot = 27) { // slot 27 is Beacon UI
+					if($this->inventorySlot === 27) { // slot 27 is Beacon UI
 						$window = Beacons::getBeaconInventory($player);
 						$slot = $this->inventorySlot - 27;
 					}elseif($this->inventorySlot >= 28 and $this->inventorySlot <= 31){
