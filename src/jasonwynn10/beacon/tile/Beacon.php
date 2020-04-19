@@ -304,13 +304,11 @@ class Beacon extends Spawnable implements InventoryHolder {
 	private function checkViewers() : void {
 		$viewers = $this->level->getChunkPlayers($this->getFloorX() >> 4, $this->getFloorZ() >> 4);
 		$names = [];
-		foreach($viewers as $player) {
-			$names[] = $player->getName();
-		}
 		$newViewers = [];
-		foreach($this->viewers as $player) {
-			if(@in_array($player, $names))
-				$newViewers[] = $player;
+		foreach($viewers as $player) {
+			if(!in_array($player->getName(), $this->viewers))
+				$newViewers[] = $player->getName();
+			$names[] = $player->getName();
 		}
 		foreach($newViewers as $name) {
 			$player = $this->level->getServer()->getPlayerExact($name);
