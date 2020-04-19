@@ -16,6 +16,7 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\Player;
+use pocketmine\scheduler\ClosureTask;
 use pocketmine\tile\Spawnable;
 
 class Beacon extends Spawnable implements InventoryHolder {
@@ -318,8 +319,10 @@ class Beacon extends Spawnable implements InventoryHolder {
 			$beacon = BlockFactory::get(BlockIds::BEACON);
 			$beacon->position($this->asPosition());
 			if($player instanceof Player) {
-				$this->level->sendBlocks([$player], [$glass], UpdateBlockPacket::FLAG_ALL_PRIORITY);
-				$this->level->sendBlocks([$player], [$beacon], UpdateBlockPacket::FLAG_ALL_PRIORITY);
+				$this->getLevel()->getServer()->getPluginManager()->getPlugin("PM-Beacons")->getScheduler()->scheduleDelayedTask(new ClosureTask(function(int $currentTick) use ($player, $glass, $beacon) : void {
+					$this->level->sendBlocks([$player], [$glass], UpdateBlockPacket::FLAG_ALL_PRIORITY);
+					$this->level->sendBlocks([$player], [$beacon], UpdateBlockPacket::FLAG_ALL_PRIORITY);
+				}), 20);
 			}
 		}
 		$this->viewers = $names;
