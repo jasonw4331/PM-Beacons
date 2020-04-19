@@ -5,6 +5,7 @@ namespace jasonwynn10\beacon\tile;
 
 use jasonwynn10\beacon\inventory\BeaconInventory;
 use pocketmine\block\Block;
+use pocketmine\block\BlockFactory;
 use pocketmine\block\BlockIds;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
@@ -13,6 +14,7 @@ use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\Player;
 use pocketmine\tile\Spawnable;
 
@@ -31,6 +33,8 @@ class Beacon extends Spawnable implements InventoryHolder {
 	protected $inventory;
 	/** @var int $ticks */
 	private $ticks = 0;
+	/** @var string[] $viewers */
+	private $viewers = [];
 	/** @var int $tier */
 	protected $tier = 0;
 	/** @var int $primary */
@@ -61,6 +65,8 @@ class Beacon extends Spawnable implements InventoryHolder {
 		}
 
 		$this->timings->startTiming();
+
+		$this->checkViewers();
 
 		$currentTick = $this->getLevel()->getServer()->getTick();
 		if($this->ticks + 80 <= $currentTick) { // 80 ticks = 4 seconds
@@ -292,5 +298,30 @@ class Beacon extends Spawnable implements InventoryHolder {
 	public function setMovable(bool $movable) : self {
 		$this->movable = $movable;
 		return $this;
+	}
+
+	private function checkViewers() : void {
+		$viewers = $this->level->getChunkPlayers($this->getFloorX() >> 4, $this->getFloorZ() >> 4);
+		$names = [];
+		foreach($viewers as $player) {
+			$names[] = $player->getName();
+		}
+		$newViewers = [];
+		foreach($this->viewers as $player) {
+			if(@in_array($player, $names))
+				$newViewers[] = $player;
+		}
+		foreach($newViewers as $name) {
+			$player = $this->level->getServer()->getPlayerExact($name);
+			$glass = BlockFactory::get(BlockIds::GLASS);
+			$glass->position($this->asPosition());
+			$beacon = BlockFactory::get(BlockIds::BEACON);
+			$beacon->position($this->asPosition());
+			if($player instanceof Player) {
+				$this->level->sendBlocks([$player], [$glass], UpdateBlockPacket::FLAG_ALL_PRIORITY);
+				$this->level->sendBlocks([$player], [$beacon], UpdateBlockPacket::FLAG_ALL_PRIORITY);
+			}
+		}
+		$this->viewers = $names;
 	}
 }
