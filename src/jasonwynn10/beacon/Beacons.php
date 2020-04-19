@@ -10,8 +10,10 @@ use pocketmine\Achievement;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\event\Listener;
+use pocketmine\inventory\ShapedRecipe;
 use pocketmine\item\Item;
 use pocketmine\item\ItemBlock;
+use pocketmine\item\ItemFactory;
 use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
@@ -26,6 +28,21 @@ class Beacons extends PluginBase implements Listener {
 		Tile::registerTile(BeaconTile::class, [BeaconTile::BEACON, "minecraft:beacon"]);
 		BlockFactory::registerBlock(new Beacon(), true);
 		Item::addCreativeItem(new ItemBlock(Block::BEACON));
+		$this->getServer()->getCraftingManager()->registerShapedRecipe(
+			new ShapedRecipe(
+				[
+					"aaa",
+					"aba",
+					"ccc"
+				],
+				[
+					"a" => ItemFactory::get(Item::GLASS),
+					"b" => ItemFactory::get(Item::NETHER_STAR),
+					"c" => ItemFactory::get(Item::OBSIDIAN)
+				],
+				[ItemFactory::get(Item::BEACON)]
+			)
+		);
 	}
 
 	public function onEnable() {
