@@ -8,6 +8,8 @@ use pocketmine\network\mcpe\protocol\types\WindowTypes;
 use pocketmine\Player;
 
 class BeaconInventory extends ContainerInventory {
+	/** @var Position */
+	protected $holder;
 
 	/**
 	 * BeaconInventory constructor.
@@ -43,8 +45,7 @@ class BeaconInventory extends ContainerInventory {
 	 * @return Position
 	 */
 	public function getHolder() {
-		/** @noinspection PhpIncompatibleReturnTypeInspection */
-		return parent::getHolder();
+		return $this->holder;
 	}
 
 	/**

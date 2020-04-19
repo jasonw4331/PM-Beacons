@@ -143,7 +143,7 @@ class Beacon extends Spawnable implements InventoryHolder {
 		if($this->y === $this->getLevel()->getHighestBlockAt($this->x, $this->z))
 			return false;
 		for($i = $this->y; $i < $this->level->getWorldHeight(); $i++){
-			if(($block = $this->getLevel()->getBlockAt($this->x, $i, $this->z))->isSolid() && !$block->getId() === Block::BEACON)
+			if(($block = $this->getLevel()->getBlockAt($this->x, $i, $this->z))->isSolid() && $block->getId() !== Block::BEACON)
 				return true;
 		}
 		return false;
@@ -223,7 +223,7 @@ class Beacon extends Spawnable implements InventoryHolder {
 	/**
 	 * @return BeaconInventory
 	 */
-	public function getInventory() {
+	public function getInventory() : BeaconInventory {
 		return $this->inventory;
 	}
 

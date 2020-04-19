@@ -84,10 +84,8 @@ class CustomInventoryAction extends NetworkInventoryAction {
 					case self::SOURCE_TYPE_CRAFTING_RESULT:
 					case self::SOURCE_TYPE_CRAFTING_USE_INGREDIENT:
 						return null;
-					break;
 					case -10: // TODO: is beacon always -10 ?
 						return new DeleteItemAction($this->oldItem, $this->newItem);
-					break;
 				}
 
 				//TODO: more stuff

@@ -83,6 +83,7 @@ class Beacon extends Block {
 			if($t instanceof BeaconTile) {
 				$beacon = $t;
 			}else {
+				/** @var BeaconTile $beacon */
 				$beacon = BeaconTile::createTile(BeaconTile::BEACON, $this->getLevel(), BeaconTile::createNBT($this));
 			}
 
@@ -104,6 +105,7 @@ class Beacon extends Block {
 		if($t instanceof BeaconTile) {
 			$beacon = $t;
 		}else {
+			/** @var BeaconTile $beacon */
 			$beacon = BeaconTile::createTile(BeaconTile::BEACON, $this->getLevel(), BeaconTile::createNBT($this));
 		}
 		if(!$beacon->isMovable())
