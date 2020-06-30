@@ -12,7 +12,7 @@ class InventoryTransactionPacketV2 extends InventoryTransactionPacket {
 		$this->transactionType = $this->getUnsignedVarInt();
 
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-			$this->actions[] = $action = (new CustomInventoryAction())->read($this);
+			$this->actions[] = $action = (new CustomInventoryAction())->read($this->hasItemStackIds);
 
 			if(
 				$action->sourceType === NetworkInventoryAction::SOURCE_CONTAINER and
