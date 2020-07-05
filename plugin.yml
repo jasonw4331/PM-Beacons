@@ -1,10 +1,9 @@
 name: PM-Beacons
 main: jasonwynn10\beacon\Beacons
-version: 1.0.4
+version: 1.0.5
 api:
  - 3.0.0
 description: "Beacons for PocketMine-MP exactly like Vanilla!"
 author: "jasonwynn10"
 mcpe-protocol:
- - 389
- - 390
+ - 407
