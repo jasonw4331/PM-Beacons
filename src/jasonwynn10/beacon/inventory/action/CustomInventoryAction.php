@@ -9,7 +9,6 @@ use pocketmine\inventory\transaction\action\DropItemAction;
 use pocketmine\inventory\transaction\action\InventoryAction;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
-use pocketmine\network\mcpe\protocol\types\inventory\UIInventorySlotOffset;
 use pocketmine\network\mcpe\protocol\types\NetworkInventoryAction;
 use pocketmine\Player;
 
@@ -29,24 +28,24 @@ class CustomInventoryAction extends NetworkInventoryAction {
 		switch($this->sourceType){
 			case self::SOURCE_CONTAINER:
 				if($this->windowId === ContainerIds::UI and $this->inventorySlot > 0){
-					if($this->inventorySlot === UIInventorySlotOffset::CREATED_ITEM_OUTPUT){
+					if($this->inventorySlot === 50){
 						return null; //useless noise
 					}
-					if($this->inventorySlot === UIInventorySlotOffset::BEACON_PAYMENT) {
+					if($this->inventorySlot === 27) {
 						$window = Beacons::getBeaconInventory($player);
-						$slot = $this->inventorySlot - UIInventorySlotOffset::BEACON_PAYMENT;
-					}elseif(array_key_exists($this->inventorySlot, UIInventorySlotOffset::CRAFTING2X2_INPUT)){
+						$slot = $this->inventorySlot - 27;
+					}elseif($this->inventorySlot >= 28 and $this->inventorySlot <= 31){
 						$window = $player->getCraftingGrid();
 						if($window->getGridWidth() !== CraftingGrid::SIZE_SMALL){
 							throw new \UnexpectedValueException("Expected small crafting grid");
 						}
-						$slot = UIInventorySlotOffset::CRAFTING2X2_INPUT[$this->inventorySlot];
-					}elseif(array_key_exists($this->inventorySlot, UIInventorySlotOffset::CRAFTING3X3_INPUT)){
+						$slot = $this->inventorySlot - 28;
+					}elseif($this->inventorySlot >= 32 and $this->inventorySlot <= 40){
 						$window = $player->getCraftingGrid();
 						if($window->getGridWidth() !== CraftingGrid::SIZE_BIG){
 							throw new \UnexpectedValueException("Expected big crafting grid");
 						}
-						$slot = UIInventorySlotOffset::CRAFTING3X3_INPUT[$this->inventorySlot];
+						$slot = $this->inventorySlot - 32;
 					}else{
 						throw new \UnexpectedValueException("Unhandled magic UI slot offset $this->inventorySlot");
 					}
