@@ -3,7 +3,7 @@ declare(strict_types=1);
 namespace jasonwynn10\beacon\packet;
 
 use pocketmine\network\mcpe\NetworkSession as PacketHandlerInterface;
-use pocketmine\network\mcpe\protocol\types\inventory\InventoryTransactionChangedSlotsHack;
+//use pocketmine\network\mcpe\protocol\types\inventory\InventoryTransactionChangedSlotsHack;
 use pocketmine\network\mcpe\protocol\types\inventory\MismatchTransactionData;
 use pocketmine\network\mcpe\protocol\types\inventory\NormalTransactionData;
 use pocketmine\network\mcpe\protocol\types\inventory\ReleaseItemTransactionData;
