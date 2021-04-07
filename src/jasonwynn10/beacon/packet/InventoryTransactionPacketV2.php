@@ -37,9 +37,17 @@ class InventoryTransactionPacketV2 extends InventoryTransactionPacket {
 		$this->requestId = $in->readGenericTypeNetworkId();
 		$this->requestChangedSlots = [];
 		if($this->requestId !== 0){
-			for($i = 0, $len = $in->getUnsignedVarInt(); $i < $len; ++$i){
-				$this->requestChangedSlots[] = InventoryTransactionChangedSlotsHack::read($in);
+			for($i = 0, $len = $this->getUnsignedVarInt(); $i < $len; ++$i){
+				$this->requestChangedSlots[] = InventoryTransactionChangedSlotsHack::read($this);
 			}
+		}
+
+		$this->transactionType = $this->getUnsignedVarInt();
+
+		$this->hasItemStackIds = $this->getBool();
+
+		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+			$this->actions[] = (new CustomInventoryAction())->read($this, $this->hasItemStackIds);
 		}
 
 		$transactionType = $in->getUnsignedVarInt();
