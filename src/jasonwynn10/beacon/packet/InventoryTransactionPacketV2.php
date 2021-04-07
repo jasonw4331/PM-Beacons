@@ -17,14 +17,36 @@ use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\InventoryTransactionChangedSlotsHack;
 use function count;
 
+/**
+ * Class InventoryTransactionPacketV2
+ * @package jasonwynn10\beacon\packet
+ */
 class InventoryTransactionPacketV2 extends InventoryTransactionPacket {
-	public const NETWORK_ID = ProtocolInfo::INVENTORY_TRANSACTION_PACKET;
+    /**
+     *
+     */
+    public const NETWORK_ID = ProtocolInfo::INVENTORY_TRANSACTION_PACKET;
 
-	public const TYPE_NORMAL = 0;
-	public const TYPE_MISMATCH = 1;
-	public const TYPE_USE_ITEM = 2;
-	public const TYPE_USE_ITEM_ON_ENTITY = 3;
-	public const TYPE_RELEASE_ITEM = 4;
+    /**
+     *
+     */
+    public const TYPE_NORMAL = 0;
+    /**
+     *
+     */
+    public const TYPE_MISMATCH = 1;
+    /**
+     *
+     */
+    public const TYPE_USE_ITEM = 2;
+    /**
+     *
+     */
+    public const TYPE_USE_ITEM_ON_ENTITY = 3;
+    /**
+     *
+     */
+    public const TYPE_RELEASE_ITEM = 4;
 
 	/** @var int */
 	public $requestId;
@@ -32,8 +54,19 @@ class InventoryTransactionPacketV2 extends InventoryTransactionPacket {
 	public $requestChangedSlots;
 	/** @var TransactionData */
 	public $trData;
+    /**
+     * @var
+     */
+    public $transactionType;
+    /**
+     * @var
+     */
+    public $hasItemStackIds;
 
-	protected function decodePayload() : void{
+    /**
+     *
+     */
+    protected function decodePayload() : void{
 		$in = $this;
 		$this->requestId = $in->readGenericTypeNetworkId();
 		$this->requestChangedSlots = [];
