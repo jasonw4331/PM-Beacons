@@ -105,7 +105,6 @@ class InventoryTransactionPacketV2 extends InventoryTransactionPacket {
 			default:
 				throw new PacketDecodeException("Unknown transaction type $transactionType");
 		}
-
 		$this->trData->decode($in);
 	}
 }
