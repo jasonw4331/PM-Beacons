@@ -81,7 +81,7 @@ class InventoryTransactionPacketV2 extends InventoryTransactionPacket {
 		$this->hasItemStackIds = $this->getBool();
 
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-			$this->actions[] = (new CustomInventoryAction())->read($this, $this->hasItemStackIds);
+			$this->actions[] = (new CustomInventoryAction())->read($this);
 		}
 
 		$transactionType = $in->getUnsignedVarInt();
