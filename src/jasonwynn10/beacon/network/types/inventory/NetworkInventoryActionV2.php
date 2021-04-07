@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
-namespace jasonwynn10\beacon\inventory\action;
+namespace jasonwynn10\beacon\network\types\inventory;
 
 use jasonwynn10\beacon\Beacons;
+use jasonwynn10\beacon\inventory\action\DeleteItemAction;
 use pocketmine\inventory\CraftingGrid;
 use pocketmine\inventory\transaction\action\CreativeInventoryAction;
 use pocketmine\inventory\transaction\action\DropItemAction;
@@ -13,16 +14,16 @@ use pocketmine\network\mcpe\protocol\types\inventory\UIInventorySlotOffset;
 use pocketmine\network\mcpe\protocol\types\NetworkInventoryAction;
 use pocketmine\Player;
 
-class CustomInventoryAction extends NetworkInventoryAction {
+class NetworkInventoryActionV2 extends NetworkInventoryAction {
 	/**
-	 * @param Player $player
-	 *
 	 * @return InventoryAction|null
 	 *
 	 * @throws \UnexpectedValueException
 	 */
 	public function createInventoryAction(Player $player){
-		if($this->oldItem->equalsExact($this->newItem)){
+		$oldItem = $this->oldItem->getItemStack();
+		$newItem = $this->newItem->getItemStack();
+		if($oldItem->equalsExact($newItem)){
 			//filter out useless noise in 1.13
 			return null;
 		}
@@ -32,7 +33,7 @@ class CustomInventoryAction extends NetworkInventoryAction {
 					if($this->inventorySlot === UIInventorySlotOffset::CREATED_ITEM_OUTPUT){
 						return null; //useless noise
 					}
-					if($this->inventorySlot === 27) {
+					if($this->inventorySlot === UIInventorySlotOffset::BEACON_PAYMENT) {
 						$window = Beacons::getBeaconInventory($player);
 						$slot = $this->inventorySlot - 27;
 					}elseif(array_key_exists($this->inventorySlot, UIInventorySlotOffset::CRAFTING2X2_INPUT)){
@@ -55,7 +56,7 @@ class CustomInventoryAction extends NetworkInventoryAction {
 					$slot = $this->inventorySlot;
 				}
 				if($window !== null){
-					return new SlotChangeAction($window, $slot, $this->oldItem, $this->newItem);
+					return new SlotChangeAction($window, $slot, $oldItem, $newItem);
 				}
 
 				throw new \UnexpectedValueException("Player " . $player->getName() . " has no open container with window ID $this->windowId");
@@ -64,7 +65,7 @@ class CustomInventoryAction extends NetworkInventoryAction {
 					throw new \UnexpectedValueException("Only expecting drop-item world actions from the client!");
 				}
 
-				return new DropItemAction($this->newItem);
+				return new DropItemAction($newItem);
 			case self::SOURCE_CREATIVE:
 				switch($this->inventorySlot){
 					case self::ACTION_MAGIC_SLOT_CREATIVE_DELETE_ITEM:
@@ -78,7 +79,7 @@ class CustomInventoryAction extends NetworkInventoryAction {
 
 				}
 
-				return new CreativeInventoryAction($this->oldItem, $this->newItem, $type);
+				return new CreativeInventoryAction($oldItem, $newItem, $type);
 			case self::SOURCE_TODO:
 				//These types need special handling.
 				switch($this->windowId){
@@ -86,7 +87,7 @@ class CustomInventoryAction extends NetworkInventoryAction {
 					case self::SOURCE_TYPE_CRAFTING_USE_INGREDIENT:
 						return null;
 					case -10: // TODO: is beacon always -10 ?
-						return new DeleteItemAction($this->oldItem, $this->newItem);
+						return new DeleteItemAction($oldItem, $newItem);
 				}
 
 				//TODO: more stuff
