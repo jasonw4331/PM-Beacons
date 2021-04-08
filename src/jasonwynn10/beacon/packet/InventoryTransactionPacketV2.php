@@ -12,6 +12,7 @@ use pocketmine\network\mcpe\protocol\types\inventory\UseItemTransactionData;
 use UnexpectedValueException as PacketDecodeException;
 
 class InventoryTransactionPacketV2 extends InventoryTransactionPacket {
+	public $preDecodeOffset;
 	protected function decodePayload() : void{
 		$in = $this;
 		$this->requestId = $in->readGenericTypeNetworkId();

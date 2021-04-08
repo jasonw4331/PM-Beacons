@@ -8,13 +8,11 @@ use pocketmine\network\mcpe\protocol\types\inventory\NormalTransactionData;
 class NormalTransactionDataV2 extends NormalTransactionData {
 
 	protected function decodeData(PacketSerializer $stream) : void{
-		$offset = $stream->offset;
 		$stream->offset = $stream->preDecodeOffset;
 		$this->actions = [];
 		$actionCount = $stream->getUnsignedVarInt();
 		for($i = 0; $i < $actionCount; ++$i){
 			$this->actions[] = (new NetworkInventoryActionV2())->read($stream);
 		}
-		$stream->offset = $offset;
 	}
 }
